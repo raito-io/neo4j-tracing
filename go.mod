@@ -1,4 +1,4 @@
-module github.com/raito/neo4j-tracing
+module github.com/raito-io/neo4j-tracing
 
 go 1.20
 
