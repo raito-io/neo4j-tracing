@@ -1,0 +1,35 @@
+name: Build DynamoDB UTILS CI-CD
+run-name: Running CI-CD for DynamoDB UTILS
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.20
+          cache: true
+          cache-dependency-path: go.sum
+
+      - name: Mod Tidy
+        run: go mod tidy
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.51.2
+
+      - name: Build
+        run: go build ./...
+
+      - name: Test
+        run: go test ./...
