@@ -1,0 +1,9 @@
+# To try different version of Go
+GO := go
+
+test: generate
+	go test ./...
+
+lint:
+	golangci-lint run ./...
+	go fmt ./...

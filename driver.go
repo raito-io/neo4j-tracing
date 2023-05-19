@@ -29,7 +29,7 @@ func NewNeo4jTracer(opts ...Option) *Neo4jTracer {
 	}
 }
 
-func (t *Neo4jTracer) NewDriverWithContext(target string, auth auth.TokenManager, configurers ...func(config2 *neo4j.Config)) (_ neo4j.DriverWithContext, err error) {
+func (t *Neo4jTracer) NewDriverWithContext(target string, auth auth.TokenManager, configurers ...func(config2 *neo4j.Config)) (_ neo4j.DriverWithContext, err error) { //nolint:staticcheck
 	driver, err := neo4j.NewDriverWithContext(target, auth, configurers...)
 	if err != nil {
 		return nil, err
