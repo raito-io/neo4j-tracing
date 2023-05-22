@@ -9,13 +9,13 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-var _ neo4j.SessionWithContext = (*SessionWithContextTracer)(nil)
-
+// SessionWithContextTracer wraps a neo4j.SessionWithContext object so the calls can be traced with open telemetry distributed tracing
 type SessionWithContextTracer struct {
 	neo4j.SessionWithContext
 	tracer trace.Tracer
 }
 
+// BeginTransaction calls neo4j.SessionWithContext.BeginTransaction and trace the call
 func (s *SessionWithContextTracer) BeginTransaction(ctx context.Context, configurers ...func(config *neo4j.TransactionConfig)) (neo4j.ExplicitTransaction, error) {
 	spanCtx, span := s.tracer.Start(ctx, "Session.BeginTransaction", trace.WithSpanKind(trace.SpanKindClient))
 
@@ -31,6 +31,8 @@ func (s *SessionWithContextTracer) BeginTransaction(ctx context.Context, configu
 	return NewExplicitTransactionTracer(spanCtx, tx, span, s.tracer), nil
 }
 
+// ExecuteRead calls neo4j.SessionWithContext.ExecuteRead and trace the call.
+// The neo4j.ManagedTransaction object that is passed to the work function will be wrapped with a tracer.
 func (s *SessionWithContextTracer) ExecuteRead(ctx context.Context, work neo4j.ManagedTransactionWork, configurers ...func(config *neo4j.TransactionConfig)) (_ any, err error) {
 	spanCtx, span := s.tracer.Start(ctx, spanName("ExecuteRead"), trace.WithSpanKind(trace.SpanKindClient))
 	defer func() {
@@ -49,6 +51,8 @@ func (s *SessionWithContextTracer) ExecuteRead(ctx context.Context, work neo4j.M
 	}, configurers...)
 }
 
+// ExecuteWrite calls neo4j.SessionWithContext.ExecuteWrite and trace the call.
+// The neo4j.ManagedTransaction object that is passed to the work function will be wrapped with a tracer.
 func (s *SessionWithContextTracer) ExecuteWrite(ctx context.Context, work neo4j.ManagedTransactionWork, configurers ...func(config *neo4j.TransactionConfig)) (_ any, err error) {
 	spanCtx, span := s.tracer.Start(ctx, spanName("ExecuteWrite"), trace.WithSpanKind(trace.SpanKindClient))
 	defer func() {
@@ -67,6 +71,7 @@ func (s *SessionWithContextTracer) ExecuteWrite(ctx context.Context, work neo4j.
 	}, configurers...)
 }
 
+// Run calls neo4j.SessionWithContext.Run and trace the call
 func (s *SessionWithContextTracer) Run(ctx context.Context, cypher string, params map[string]any, configurers ...func(config *neo4j.TransactionConfig)) (_ neo4j.ResultWithContext, err error) {
 	spanCtx, span := s.tracer.Start(ctx, spanName("Run"), trace.WithSpanKind(trace.SpanKindClient), trace.WithAttributes(semconv.DBStatement(cypher), semconv.DBSystemNeo4j))
 	defer func() {

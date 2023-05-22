@@ -1,8 +1,5 @@
 # RAITO - Neo4J Tracing
 
-[//]: # ([![Go Report Card]&#40;https://goreportcard.com/badge/github.com/raito-io/go-dynamo-utils&#41;]&#40;https://goreportcard.com/report/github.com/raito-io/go-dynamo-utils&#41;)
-[//]: # ([![Coverage]&#40;https://img.shields.io/codecov/c/github/raito-io/go-dynamo-utils?label=coverage&#41;]&#40;https://app.codecov.io/gh/raito-io/go-dynamo-utils&#41;)
-
 ![Version](https://img.shields.io/github/v/tag/raito-io/neo4j-tracing?sort=semver&label=version&color=651FFF)
 [![Build](https://img.shields.io/github/actions/workflow/status/raito-io/go-dynamo-utils/build.yml?branch=main)](https://github.com/raito-io/go-dynamo-utils/actions/workflows/build.yml)
 [![Contribute](https://img.shields.io/badge/Contribute-🙌-green.svg)](/CONTRIBUTING.md)
@@ -17,4 +14,50 @@
 Add this library as a dependency via `go get github.com/raito-io/neo4j-tracing`
 
 ## Enable tracing
-TODO
+Tracing can be enabled by using the `neo4j_tracing.Neo4jTracer` object. 
+The `Neo4jTracer` a factory that creates `neo4j.DriverWithContext` objects that are wrapped so distributed tracing can be applied.
+
+Start using tracing is very easy. A regular neo4j driver will be created as follows:
+```go
+package main
+
+import (
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
+)
+
+func main() {
+    dbUri := "neo4j://localhost" // scheme://host(:port) (default port is 7687)
+    driver, err := neo4j.NewDriverWithContext(dbUri, neo4j.BasicAuth("neo4j", "letmein!", ""))
+    if err != nil {
+        panic(err)
+    }
+    // Do something useful
+}
+```
+
+To enable tracing you need to create your driver by using the `Neo4jTracer` object.
+```go
+package main
+
+import (
+    "github.com/neo4j/neo4j-go-driver/v5/neo4j"
+    neo4j_tracing "github.com/raito-io/neo4j-tracing"
+)
+
+func main() {
+    driverFactory := neo4j_tracing.NewNeo4jTracer()
+	
+    dbUri := "neo4j://localhost" // scheme://host(:port) (default port is 7687)
+    driver, err := driverFactory.NewDriverWithContext(dbUri, neo4j.BasicAuth("neo4j", "letmein!", ""))
+    if err != nil {
+        panic(err)
+    }
+    // Do something useful
+}
+```
+
+### Options
+The following options could be used to customize the tracing behavior:
+- `WithTracerProvider(provider)`: Specifies a custom tracer provider. By default, the global OpenTelemetry tracer provider is used.
+
+Those options are passed as argument to the `neo4j_tracing.NewNeo4jTracer()` function.

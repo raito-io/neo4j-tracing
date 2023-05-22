@@ -16,6 +16,8 @@ func (o optionFunc) apply(c *config) {
 	o(c)
 }
 
+// WithTracerProvider specifies a tracer provider to use for creating a tracer.
+// If none is specified, the global provider is used.
 func WithTracerProvider(tp trace.TracerProvider) Option {
 	return optionFunc(func(c *config) {
 		c.TraceProvider = tp
