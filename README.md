@@ -17,4 +17,4 @@
 Add this library as a dependency via `go get github.com/raito-io/neo4j-tracing`
 
 ## Enable tracing
-TOTO
+TODO
