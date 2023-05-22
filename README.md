@@ -1,4 +1,4 @@
-# RAITO - DynamoDB utils
+# RAITO - Neo4J Tracing
 
 [//]: # ([![Go Report Card]&#40;https://goreportcard.com/badge/github.com/raito-io/go-dynamo-utils&#41;]&#40;https://goreportcard.com/report/github.com/raito-io/go-dynamo-utils&#41;)
 [//]: # ([![Coverage]&#40;https://img.shields.io/codecov/c/github/raito-io/go-dynamo-utils?label=coverage&#41;]&#40;https://app.codecov.io/gh/raito-io/go-dynamo-utils&#41;)
