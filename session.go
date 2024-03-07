@@ -83,5 +83,7 @@ func (s *SessionWithContextTracer) Run(ctx context.Context, cypher string, param
 		span.End()
 	}()
 
-	return s.SessionWithContext.Run(spanCtx, cypher, params, configurers...)
+	result, err := s.SessionWithContext.Run(spanCtx, cypher, params, configurers...)
+
+	return NewResultWithContextTracer(ctx, result, s.tracer), err
 }

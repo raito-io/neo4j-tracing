@@ -37,7 +37,9 @@ func (t *ManagedTransactionTracer) Run(ctx context.Context, cypher string, param
 		span.End()
 	}()
 
-	return t.ManagedTransaction.Run(ctx, cypher, params)
+	result, err := t.ManagedTransaction.Run(ctx, cypher, params)
+
+	return NewResultWithContextTracer(t.ctx, result, t.tracer), err
 }
 
 // ExplicitTransactionTracer wraps a neo4j.ExplicitTransaction object so the calls can be traced with open telemetry distributed tracing
@@ -70,7 +72,9 @@ func (t *ExplicitTransactionTracer) Run(ctx context.Context, cypher string, para
 		span.End()
 	}()
 
-	return t.ExplicitTransaction.Run(ctx, cypher, params)
+	result, err := t.ExplicitTransaction.Run(ctx, cypher, params)
+
+	return NewResultWithContextTracer(t.ctx, result, t.tracer), err
 }
 
 // Commit calls neo4j.ExplicitTransaction.Commit and trace the call
