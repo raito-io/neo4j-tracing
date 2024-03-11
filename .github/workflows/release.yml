@@ -20,7 +20,7 @@ jobs:
         run: echo "Current tag ${{steps.tag.outputs.tag}}"
 
       - name: Install Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ^1.20
           cache: true
