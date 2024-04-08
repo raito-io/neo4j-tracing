@@ -3,7 +3,7 @@ module github.com/raito-io/neo4j-tracing
 go 1.20
 
 require (
-	github.com/neo4j/neo4j-go-driver/v5 v5.18.0
+	github.com/neo4j/neo4j-go-driver/v5 v5.19.0
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/trace v1.24.0
 )
