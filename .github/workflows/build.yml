@@ -16,7 +16,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.20
+          go-version-file: go.mod
           cache: true
           cache-dependency-path: go.sum
 
@@ -24,9 +24,9 @@ jobs:
         run: go mod tidy
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v5
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.56.2
+          version: v1.62.2
 
       - name: Build
         run: go build ./...

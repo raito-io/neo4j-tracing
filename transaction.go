@@ -27,7 +27,7 @@ func NewManagedTransactionTracer(ctx context.Context, tx neo4j.ManagedTransactio
 
 // Run calls neo4j.ManagedTransaction.Run and trace the call
 func (t *ManagedTransactionTracer) Run(ctx context.Context, cypher string, params map[string]any) (_ neo4j.ResultWithContext, err error) {
-	_, span := t.tracer.Start(t.ctx, spanName("Run"), trace.WithSpanKind(trace.SpanKindClient), trace.WithAttributes(semconv.DBStatement(cypher), semconv.DBSystemNeo4j))
+	spanCtx, span := t.tracer.Start(t.ctx, spanName("Run"), trace.WithSpanKind(trace.SpanKindClient), trace.WithAttributes(semconv.DBStatement(cypher), semconv.DBSystemNeo4j))
 	defer func() {
 		if err != nil {
 			span.RecordError(err)
@@ -39,7 +39,7 @@ func (t *ManagedTransactionTracer) Run(ctx context.Context, cypher string, param
 
 	result, err := t.ManagedTransaction.Run(ctx, cypher, params)
 
-	return NewResultWithContextTracer(t.ctx, result, t.tracer), err
+	return NewResultWithContextTracer(spanCtx, result, t.tracer), err
 }
 
 // ExplicitTransactionTracer wraps a neo4j.ExplicitTransaction object so the calls can be traced with open telemetry distributed tracing
@@ -62,7 +62,7 @@ func NewExplicitTransactionTracer(ctx context.Context, tx neo4j.ExplicitTransact
 
 // Run calls neo4j.ExplicitTransaction.Run and trace the call
 func (t *ExplicitTransactionTracer) Run(ctx context.Context, cypher string, params map[string]any) (_ neo4j.ResultWithContext, err error) {
-	_, span := t.tracer.Start(t.ctx, spanName("Run"), trace.WithSpanKind(trace.SpanKindClient), trace.WithAttributes(semconv.DBStatement(cypher), semconv.DBSystemNeo4j))
+	spanCtx, span := t.tracer.Start(t.ctx, spanName("Run"), trace.WithSpanKind(trace.SpanKindClient), trace.WithAttributes(semconv.DBStatement(cypher), semconv.DBSystemNeo4j))
 	defer func() {
 		if err != nil {
 			span.RecordError(err)
@@ -74,7 +74,7 @@ func (t *ExplicitTransactionTracer) Run(ctx context.Context, cypher string, para
 
 	result, err := t.ExplicitTransaction.Run(ctx, cypher, params)
 
-	return NewResultWithContextTracer(t.ctx, result, t.tracer), err
+	return NewResultWithContextTracer(spanCtx, result, t.tracer), err
 }
 
 // Commit calls neo4j.ExplicitTransaction.Commit and trace the call
