@@ -1,0 +1,59 @@
+version: "2"
+run:
+  modules-download-mode: readonly
+  issues-exit-code: 1
+  tests: false
+output:
+  formats:
+    text:
+      path: stdout
+      print-linter-name: true
+      print-issued-lines: true
+      colors: true
+  path-prefix: ""
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - dogsled
+    - dupl
+    - errcheck
+    - exhaustive
+    - forbidigo
+    - goconst
+    - gocritic
+    - gocyclo
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - sqlclosecheck
+    - staticcheck
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+    - wsl
+  settings:
+    revive:
+      rules:
+        - name: var-naming
+          arguments:
+            - []
+            - []
+            - - skipPackageNameChecks: true
+
+issues:
+  uniq-by-line: false
+  max-same-issues: 0
+formatters:
+  enable:
+    - gofmt
+    - goimports
