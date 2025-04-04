@@ -50,19 +50,26 @@ type DriverWithContextTracer struct {
 	tracer trace.Tracer
 }
 
-// ExecuteQueryBookmarkManager calls neo4j.DriverWithContext.ExecuteQueryBookmarkManager and wraps the resulting neo4j.BookmarkManager with a tracing object
-func (n *DriverWithContextTracer) ExecuteQueryBookmarkManager() neo4j.BookmarkManager {
-	return &BookmarkManagerTracer{
-		BookmarkManager: n.DriverWithContext.ExecuteQueryBookmarkManager(),
-		tracer:          n.tracer,
-	}
-}
-
 // NewSession calls neo4j.DriverWithContext.NewSession and wraps the resulting neo4j.SessionWithContext with a tracing object
 func (n *DriverWithContextTracer) NewSession(ctx context.Context, config neo4j.SessionConfig) neo4j.SessionWithContext {
+	bookmarks := make([]neo4j.Bookmarks, 0, 2)
+
+	if config.Bookmarks != nil {
+		bookmarks = append(bookmarks, config.Bookmarks)
+	}
+
+	if config.BookmarkManager != nil {
+		b, err := config.BookmarkManager.GetBookmarks(ctx)
+		if err == nil {
+			bookmarks = append(bookmarks, b)
+		}
+	}
+
 	return &SessionWithContextTracer{
 		SessionWithContext: n.DriverWithContext.NewSession(ctx, config),
 		tracer:             n.tracer,
+		bookmarks:          neo4j.CombineBookmarks(bookmarks...),
+		databaseName:       config.DatabaseName,
 	}
 }
 
