@@ -11,25 +11,32 @@ import (
 )
 
 const (
+	accessModeAttrKey     = "db.neo4j.access_mode"
 	bookmarksAttrKey      = "db.neo4j.bookmarks"
 	bookmarksStartAttrKey = bookmarksAttrKey + ".start"
 	bookmarksEndAttrKey   = bookmarksAttrKey + ".end"
+	fetchAttrKey          = "db.neo4j.fetch"
 )
+
+type SessionAttributes struct {
+	AccessMode   neo4j.AccessMode
+	Bookmarks    neo4j.Bookmarks
+	DatabaseName string
+	FetchSize    int
+}
 
 // SessionWithContextTracer wraps a neo4j.SessionWithContext object so the calls can be traced with open telemetry distributed tracing
 type SessionWithContextTracer struct {
 	neo4j.SessionWithContext
-	tracer       trace.Tracer
-	bookmarks    neo4j.Bookmarks
-	databaseName string
+	tracer     trace.Tracer
+	attributes SessionAttributes
 }
 
 // BeginTransaction calls neo4j.SessionWithContext.BeginTransaction and trace the call
 func (s *SessionWithContextTracer) BeginTransaction(ctx context.Context, configurers ...func(config *neo4j.TransactionConfig)) (neo4j.ExplicitTransaction, error) {
 	spanCtx, span := s.tracer.Start(ctx, "Session.BeginTransaction", trace.WithSpanKind(trace.SpanKindClient))
 
-	span.SetAttributes(attribute.StringSlice(bookmarksStartAttrKey, s.bookmarks))
-	span.SetAttributes(semconv.DBName(s.databaseName))
+	s.attributes.SetAttributes(span)
 
 	defer func() {
 		span.SetAttributes(attribute.StringSlice(bookmarksEndAttrKey, s.LastBookmarks()))
@@ -72,8 +79,7 @@ func (s *SessionWithContextTracer) execute(ctx context.Context,
 		span.End()
 	}()
 
-	span.SetAttributes(attribute.StringSlice(bookmarksStartAttrKey, s.bookmarks))
-	span.SetAttributes(semconv.DBName(s.databaseName))
+	s.attributes.SetAttributes(span)
 
 	defer func() {
 		span.SetAttributes(attribute.StringSlice(bookmarksEndAttrKey, s.LastBookmarks()))
@@ -98,8 +104,7 @@ func (s *SessionWithContextTracer) Run(ctx context.Context, cypher string, param
 		span.End()
 	}()
 
-	span.SetAttributes(attribute.StringSlice(bookmarksStartAttrKey, s.bookmarks))
-	span.SetAttributes(semconv.DBName(s.databaseName))
+	s.attributes.SetAttributes(span)
 
 	defer func() {
 		span.SetAttributes(attribute.StringSlice(bookmarksEndAttrKey, s.LastBookmarks()))
@@ -108,4 +113,18 @@ func (s *SessionWithContextTracer) Run(ctx context.Context, cypher string, param
 	result, err := s.SessionWithContext.Run(spanCtx, cypher, params, configurers...)
 
 	return NewResultWithContextTracer(spanCtx, result, s.tracer), err
+}
+
+func (a SessionAttributes) SetAttributes(span trace.Span) {
+	accessMode := "READ"
+	if a.AccessMode == neo4j.AccessModeWrite {
+		accessMode = "WRITE"
+	}
+
+	span.SetAttributes(
+		attribute.StringSlice(bookmarksStartAttrKey, a.Bookmarks),
+		semconv.DBName(a.DatabaseName),
+		attribute.Int(fetchAttrKey, a.FetchSize),
+		attribute.String(accessModeAttrKey, accessMode),
+	)
 }

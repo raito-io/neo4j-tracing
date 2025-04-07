@@ -68,8 +68,12 @@ func (n *DriverWithContextTracer) NewSession(ctx context.Context, config neo4j.S
 	return &SessionWithContextTracer{
 		SessionWithContext: n.DriverWithContext.NewSession(ctx, config),
 		tracer:             n.tracer,
-		bookmarks:          neo4j.CombineBookmarks(bookmarks...),
-		databaseName:       config.DatabaseName,
+		attributes: SessionAttributes{
+			DatabaseName: config.DatabaseName,
+			AccessMode:   config.AccessMode,
+			Bookmarks:    neo4j.CombineBookmarks(bookmarks...),
+			FetchSize:    config.FetchSize,
+		},
 	}
 }
 
